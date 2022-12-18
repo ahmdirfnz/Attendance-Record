@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:shared_preferences/shared_preferences.dart';
+// import 'add_new_user.dart';
+import 'dart:io';
 import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,6 +17,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: 'main_screen',
+      routes: {
+        'main_screen': (context) => const MyHomePage(title: 'Attendance Record App'),
+        // 'newUser_screen': (context) => const NewUser(),
+      },
       title: 'Flutter Demo',
       theme: ThemeData(
 
@@ -24,6 +32,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
+
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
@@ -33,38 +43,75 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+List <NewUser> student = [];
+
+class NewUser {
+  late String name;
+  late String phone;
+  late String date;
+
+
+  NewUser(
+    this.name,
+      this.phone,
+      this.date,
+);
+
+  NewUser.fromJson(Map<String, dynamic> json) {
+    name = json['name'];
+    phone = json['phone'];
+    date = json['date'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['name'] = this.name;
+    data['phone'] = this.phone;
+    data['date'] = this.date;
+
+    return data;
+  }
+}
+
 class _MyHomePageState extends State<MyHomePage> {
 
   bool _flagA = false;
   int _counter = 0;
+  final studentName = TextEditingController();
+  final studentPhone = TextEditingController();
 
-  // List<bool> flag = [false, false, false, false, false, false, false, false, false, false];
+  List<bool> flag = <bool>[];
 
   @override
   void initState() {
     super.initState();
-    _loadBool();
+    // _loadBool();
+    loadFavorite();
     // saved(new_flag, index);
   }
 
-  void _loadBool() async {
+  // void _loadBool() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     // _counter = (prefs.getInt('counter') ?? 0);
+  //
+  //   });
+  //   _flagA = !(prefs.getBool('flagA') ?? false);
+  //   print(_flagA);
+  //
+  // }
+
+  Future<void> loadFavorite() async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      // _counter = (prefs.getInt('counter') ?? 0);
-
+      flag = (prefs.getStringList("flag") ?? <bool>[]).map((value) => value == 'true').toList();
     });
-    _flagA = !(prefs.getBool('flagA') ?? false);
-    print(_flagA);
-
   }
 
   void _savebool() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    print('function has been called');
     setState(() {
 
-      // _counter = ((prefs.getInt('counter') ?? 0) + 1);
-      // prefs.setInt('counter', _counter);
     });
     _flagA = !(prefs.getBool('flagA') ?? false);
     prefs.setBool('flagA', _flagA);
@@ -72,6 +119,38 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
   }
+
+  Future<void> saved(int index, bool newflag) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      flag[index] = newflag;
+    });
+    await prefs.setStringList("flag", flag.map((value) => value.toString()).toList());
+    setState(() {
+      flag = (prefs.getStringList("flag") ?? <bool>[]).map((value) => value == 'true').toList();
+    });
+  }
+
+  Future addUser(File file) async {
+    String contents = await file.readAsString();
+    var jsonResponse = jsonDecode(contents);
+
+
+
+    for(var p in jsonResponse){
+
+      NewUser newUser = NewUser(p['name'],p['phone'],p['date']);
+      student.add(newUser);
+    }
+
+  }
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
+  }
+
 
   // Future<void> saved(bool new_flag, int index) async {
   //   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -136,16 +215,18 @@ class _MyHomePageState extends State<MyHomePage> {
                           width: 90,
                           child: TextButton(
                               child: Text(
-                                  _flagA ? timeago.format(DateTime.parse(newData[index]['check-in'])) : newData[index]['check-in']
+                                  flag[index] ? timeago.format(DateTime.parse(newData[index]['check-in'])) : newData[index]['check-in']
                                 // '$_counter'
                               ),
                             onPressed: () async {
-                                _savebool();
+                                // _savebool();
+                              flag[index] = !flag[index];
+                              saved(index, flag[index]);
 
                               // setState(() {
-                                // flag[index] = !flag[index];
-                                // saved(flag[index], index);
-                                // _flagA = !_flagA;
+                              //   flag[index] = !flag[index];
+                              //   saved(flag[index], index);
+                              //   _flagA = !_flagA;
                               //   _savebool();
                               // });
                               // SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -169,7 +250,65 @@ class _MyHomePageState extends State<MyHomePage> {
 
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          // Navigator.pushNamed(context, 'newUser_screen');
+          // addUser();
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  scrollable: true,
+                  title: Text('Add User'),
+                  content: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Form(
+                      child: Column(
+                        children: <Widget>[
+                          TextFormField(
+                            controller: studentName,
+                            decoration: InputDecoration(
+                              labelText: 'Name',
+                              icon: Icon(Icons.account_box),
+                            ),
+                          ),
+                          TextFormField(
+                            controller: studentPhone,
+                            decoration: InputDecoration(
+                              labelText: 'Phone',
+                              icon: Icon(Icons.phone),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  actions: [
+                    RaisedButton(
+                      color: Colors.blue,
+                        child: Text("Add", style: TextStyle(color: Colors.white),),
+                        onPressed: () async {
+                        final newDate = DateTime.now();
+                        String newFormatDate = DateFormat('dd MMM yyyy, h:mm a').format(newDate);
+                        final Directory? directory = await getExternalStorageDirectory();
+                        final path = await _localPath;
+                        final File file = File('$path/assets/attendance_dataset/attendance.json');
+                        await addUser(file);
+                        final newStudent = NewUser(
+                            studentName.text,
+                            studentPhone.text,
+                            newFormatDate,
+                        );
+                        student.add(newStudent);
+                        student.map((newUser) => newUser.toJson()).toList();
+                        file.writeAsStringSync(json.encode(student));
+                        Navigator.pushNamed(context, 'main_screen');
+
+                          // your code
+                        })
+                  ],
+                );
+              });
+        },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.

@@ -37,6 +37,9 @@ dependencies:
   intl: ^0.18.0
   timeago: ^3.2.2
   shared_preferences: ^2.0.15
+  path: ^1.8.1
+  provider: ^6.0.5
+  path_provider: ^2.0.11
 
 dev_dependencies:
   flutter_test:
