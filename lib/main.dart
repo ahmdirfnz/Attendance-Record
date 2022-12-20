@@ -24,6 +24,7 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _doneOnboarding = doneOnboarding;
     });
+    await prefs.setBool('done_onboarding', true);
   }
 
   @override
@@ -35,6 +36,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
 

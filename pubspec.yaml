@@ -43,6 +43,7 @@ dependencies:
   fluttertoast: ^8.1.2
   after_layout: ^1.2.0
   social_share: ^2.3.1
+  introduction_screen: ^3.1.1
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +70,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/attendance_dataset/attendance.json
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -1,15 +1,12 @@
 import 'dart:convert';
-
 import 'package:attendance_record/components/add_dialog.dart';
 import 'package:attendance_record/helper/extensions.dart';
 import 'package:attendance_record/screens/detail_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:social_share/social_share.dart';
 import 'package:timeago/timeago.dart' as timeago;
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/attendee.dart';
@@ -113,10 +110,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         actions: [
           TextButton(
             child: const Text(
-              'Change Format',
+              'Change Date Format',
               style: TextStyle(color: Colors.white),
             ),
             onPressed: () {

@@ -15,6 +15,7 @@ class _DetailPageState extends State<DetailPage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -23,25 +24,52 @@ class _DetailPageState extends State<DetailPage> {
           leading: IconButton(onPressed: () {
             Navigator.pop(context);
           },
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
           ),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text(
-                widget.attendee.user,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Name: ',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 6,),
+                  Text(
+                     'Phone Number: ',
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)
+                  ),
+                  SizedBox(height: 6,),
+                  Text(
+                      'Date: ',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
-              Text(
-                  widget.attendee.phone,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)
-              ),
-              Text(
-                  widget.attendee.checkIn.formattedDate(),
-                  style: const TextStyle(fontSize: 20),
+              const SizedBox(width: 15,),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.attendee.user,
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 6,),
+                  Text(
+                      widget.attendee.phone,
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)
+                  ),
+                  const SizedBox(height: 6,),
+                  Text(
+                    widget.attendee.checkIn.formattedDate(),
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
             ],
           ),
