@@ -128,7 +128,6 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               onChanged: (value) {
-                // filterSearchResults(searchController.text);
                 setState(() {
                   setResults(value);
                   _flagSearch = true;
