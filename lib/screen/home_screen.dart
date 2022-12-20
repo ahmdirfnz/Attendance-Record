@@ -9,7 +9,7 @@ import 'package:timeago/timeago.dart' as timeago;
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../model/attendance.dart';
+import '../model/attendee.dart';
 import 'Detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -276,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           String newFormatDate =
                               DateFormat("yyyy-MM-dd hh:mm:ss").format(newDate);
                           print(newFormatDate);
-                          final newStudent = Attendance(
+                          final newStudent = Attendee(
                               user: nameTextEditing.text,
                               phone: phoneTextEditing.text,
                               checkIn: newFormatDate);

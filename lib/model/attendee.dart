@@ -1,13 +1,13 @@
-class Attendance {
+class Attendee {
   String? user;
   String? phone;
   String? checkIn;
 
-  Attendance({
+  Attendee({
     this.user, this.phone, this.checkIn
   });
 
-  Attendance.fromJson(Map<String, dynamic> json) {
+  Attendee.fromJson(Map<String, dynamic> json) {
     user = json['user'];
     phone = json['phone'];
     checkIn = json['check-in'];
