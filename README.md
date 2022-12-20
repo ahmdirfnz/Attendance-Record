@@ -1,6 +1,4 @@
-# attendance_record
-
-Attendance Record Application
+# Attendance Record Application
 
 This app is used to :
 
