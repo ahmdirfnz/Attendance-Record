@@ -1,16 +1,13 @@
 # attendance_record
 
-A new Flutter project.
+Attendance Record Application
 
-## Getting Started
+This app is used to :
 
-This project is a starting point for a Flutter application.
+- Display data from json file 
+- Add new attendee and 
+- Search attendee list based on name
+- Share phone number to any other app
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img src="https://user-images.githubusercontent.com/46247388/208777740-d97b54da-21a6-4006-88ed-c258c9c843c5.gif" width="320">
