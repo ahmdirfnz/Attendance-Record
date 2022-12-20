@@ -1,12 +1,10 @@
-import 'package:after_layout/after_layout.dart';
-import 'package:attendance_record/screen/Detail_screen.dart';
-import 'package:attendance_record/screen/Onboard_screen.dart';
+import 'package:attendance_record/screen/detail_screen.dart';
+import 'package:attendance_record/screen/onboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:attendance_record/model/attendance.dart';
-import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:social_share/social_share.dart';
@@ -42,11 +40,6 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // initialRoute: 'main_screen',
-      routes: {
-        'main_screen': (context) => const MyHomePage(),
-        'onboard_screen': (context) => const OnboardingScreen(),
-      },
       title: 'Flutter Demo',
       theme: ThemeData(
 
@@ -87,24 +80,9 @@ class _MyHomePageState extends State<MyHomePage>{
     _controller = ScrollController();
     _controller.addListener(_scrollListener);
     search.addAll(student);
-    // _loadBool();
     addUser();
     loadFormat();
-    // saved(new_flag, index);
   }
-
-  Future checkFirstSeen() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool seen = (prefs.getBool('seen') ?? false);
-
-    if (seen) {
-      Navigator.pushNamed(context, 'main_screen');
-    } else {
-      await prefs.setBool('seen', true);
-      Navigator.pushNamed(context, 'onboard_screen');
-    }
-  }
-
 
   void _showToast(BuildContext context) {
     final scaffold = ScaffoldMessenger.of(context);
@@ -127,7 +105,6 @@ class _MyHomePageState extends State<MyHomePage>{
 
 
   Future addUser() async {
-
     try {
       var content =  await rootBundle.loadString('assets/attendance_dataset/attendance.json');
       var response = jsonDecode(content);
@@ -140,8 +117,6 @@ class _MyHomePageState extends State<MyHomePage>{
           return DateTime.parse(firstDate).compareTo(DateTime.parse(secondDate));
         });
       });
-
-      // print(student);
     } catch(e) {
     }
   }
@@ -279,14 +254,12 @@ class _MyHomePageState extends State<MyHomePage>{
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigator.pushNamed(context, 'newUser_screen');
-          // addUser();
           showDialog(
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
                   scrollable: true,
-                  title: Text('Add User'),
+                  title: const Text('Add User'),
                   content: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Form(
@@ -313,7 +286,7 @@ class _MyHomePageState extends State<MyHomePage>{
                   actions: [
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(textStyle: TextStyle(color: Colors.blue)),
-                        child: Text("Add", style: TextStyle(color: Colors.white),),
+                        child: const Text("Add", style: TextStyle(color: Colors.white),),
                         onPressed: () async {
                         final newDate = DateTime.now();
                         String newFormatDate = DateFormat("yyyy-MM-dd hh:mm:ss").format(newDate);
@@ -332,11 +305,6 @@ class _MyHomePageState extends State<MyHomePage>{
                         Navigator.pop(context);
 
                         print(student);
-                        // student.map((newUser) => newUser.toJson()).toList();
-                        // file.writeAsStringSync(json.encode(student));
-                        // Navigator.pushNamed(context, 'main_screen');
-
-                          // your code
                         }
                         ),
                   ],
