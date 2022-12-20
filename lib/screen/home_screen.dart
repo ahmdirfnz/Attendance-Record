@@ -31,9 +31,9 @@ class _HomeScreenState extends State<HomeScreen>{
   bool _flagSearch = false;
 
   bool _flag = false;
-  final studentName = TextEditingController();
-  final studentPhone = TextEditingController();
-  final searchController = TextEditingController();
+  final nameTextEditing = TextEditingController();
+  final phoneTextEditing = TextEditingController();
+  final searchTextEditing = TextEditingController();
 
 
   @override
@@ -146,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen>{
 
 
               },
-              controller: searchController,
+              controller: searchTextEditing,
               decoration: const InputDecoration(
                   labelText: "Search",
                   hintText: "Search",
@@ -228,14 +228,14 @@ class _HomeScreenState extends State<HomeScreen>{
                       child: Column(
                         children: <Widget>[
                           TextFormField(
-                            controller: studentName,
+                            controller: nameTextEditing,
                             decoration: const InputDecoration(
                               labelText: 'Name',
                               icon: Icon(Icons.account_box),
                             ),
                           ),
                           TextFormField(
-                            controller: studentPhone,
+                            controller: phoneTextEditing,
                             decoration: const InputDecoration(
                               labelText: 'Phone',
                               icon: Icon(Icons.phone),
@@ -253,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen>{
                           final newDate = DateTime.now();
                           String newFormatDate = DateFormat("yyyy-MM-dd hh:mm:ss").format(newDate);
                           print(newFormatDate);
-                          final newStudent = Attendance(user: studentName.text, phone: studentPhone.text, checkIn: newFormatDate);
+                          final newStudent = Attendance(user: nameTextEditing.text, phone: phoneTextEditing.text, checkIn: newFormatDate);
 
                           setState(() {
                             student.add(newStudent.toJson());
