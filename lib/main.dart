@@ -1,253 +1,281 @@
+import 'package:after_layout/after_layout.dart';
+import 'package:attendance_record/screen/Detail_screen.dart';
+import 'package:attendance_record/screen/Onboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'add_new_user.dart';
+import 'package:attendance_record/model/attendance.dart';
 import 'dart:io';
 import 'dart:convert';
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart';
+import 'package:social_share/social_share.dart';
 
 void main() {
   runApp(const MyApp());
 }
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
+  var _doneOnboarding = false;
+
+  void _checkShowOnboarding() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var doneOnboarding = (prefs.getBool('done_onboarding') ?? false);
+    setState(() {
+      _doneOnboarding = doneOnboarding;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkShowOnboarding();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: 'main_screen',
+      // initialRoute: 'main_screen',
       routes: {
-        'main_screen': (context) => const MyHomePage(title: 'Attendance Record App'),
-        // 'newUser_screen': (context) => const NewUser(),
+        'main_screen': (context) => const MyHomePage(),
+        'onboard_screen': (context) => const OnboardingScreen(),
       },
       title: 'Flutter Demo',
       theme: ThemeData(
 
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Attendance Record App'),
+      home: _doneOnboarding ? MyHomePage() : OnboardingScreen(),
     );
   }
 }
 
-
-
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({Key? key}) : super(key: key);
 
-  final String title;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-List <NewUser> student = [];
 
-class NewUser {
-  late String name;
-  late String phone;
-  late String date;
+class _MyHomePageState extends State<MyHomePage>{
 
+  List student = [];
+  List search = [];
 
-  NewUser(
-    this.name,
-      this.phone,
-      this.date,
-);
+  late ScrollController _controller;
 
-  NewUser.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-    phone = json['phone'];
-    date = json['date'];
-  }
+  bool _flagSearch = false;
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
-    data['phone'] = this.phone;
-    data['date'] = this.date;
-
-    return data;
-  }
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-
-  bool _flagA = false;
-  int _counter = 0;
+  bool _flag = false;
   final studentName = TextEditingController();
   final studentPhone = TextEditingController();
+  final searchController = TextEditingController();
 
-  List<bool> flag = <bool>[];
 
   @override
   void initState() {
     super.initState();
+    _controller = ScrollController();
+    _controller.addListener(_scrollListener);
+    search.addAll(student);
     // _loadBool();
-    loadFavorite();
+    addUser();
+    loadFormat();
     // saved(new_flag, index);
   }
 
-  // void _loadBool() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     // _counter = (prefs.getInt('counter') ?? 0);
-  //
-  //   });
-  //   _flagA = !(prefs.getBool('flagA') ?? false);
-  //   print(_flagA);
-  //
-  // }
-
-  Future<void> loadFavorite() async{
+  Future checkFirstSeen() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      flag = (prefs.getStringList("flag") ?? <bool>[]).map((value) => value == 'true').toList();
-    });
-  }
+    bool seen = (prefs.getBool('seen') ?? false);
 
-  void _savebool() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-
-    });
-    _flagA = !(prefs.getBool('flagA') ?? false);
-    prefs.setBool('flagA', _flagA);
-    print(_flagA);
-
-
-  }
-
-  Future<void> saved(int index, bool newflag) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      flag[index] = newflag;
-    });
-    await prefs.setStringList("flag", flag.map((value) => value.toString()).toList());
-    setState(() {
-      flag = (prefs.getStringList("flag") ?? <bool>[]).map((value) => value == 'true').toList();
-    });
-  }
-
-  Future addUser(File file) async {
-    String contents = await file.readAsString();
-    var jsonResponse = jsonDecode(contents);
-
-
-
-    for(var p in jsonResponse){
-
-      NewUser newUser = NewUser(p['name'],p['phone'],p['date']);
-      student.add(newUser);
+    if (seen) {
+      Navigator.pushNamed(context, 'main_screen');
+    } else {
+      await prefs.setBool('seen', true);
+      Navigator.pushNamed(context, 'onboard_screen');
     }
-
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-
-    return directory.path;
   }
 
 
-  // Future<void> saved(bool new_flag, int index) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   prefs.setBool('flagFormat$index', new_flag);
-  //   setState(() {
-  //     flag[index] = new_flag;
-  //   });
-  //   await prefs.setStringList("flagFormat", flag.map((value) => value.toString()).toList());
-  //   setState(() {
-  //     flag = (prefs.getStringList("flagFormat") ?? <bool>[]).map((value) => value == 'true').toList();
-  //   });
-  //   print(flag[index]);
-  // }
+  void _showToast(BuildContext context) {
+    final scaffold = ScaffoldMessenger.of(context);
+    scaffold.showSnackBar(
+      SnackBar(
+        content: const Text('You have reached the end of the list'),
+        action: SnackBarAction(label: 'UNDO', onPressed: scaffold.hideCurrentSnackBar),
+      ),
+    );
+  }
+
+  _scrollListener() {
+    if (_controller.offset >= _controller.position.maxScrollExtent &&
+        !_controller.position.outOfRange) {
+      setState(() {
+        _showToast(context);
+      });
+    }
+  }
+
+
+  Future addUser() async {
+
+    try {
+      var content =  await rootBundle.loadString('assets/attendance_dataset/attendance.json');
+      var response = jsonDecode(content);
+      // print(response);
+      setState(() {
+        student = response;
+        student.sort((b,a) {
+          var firstDate = a["check-in"];
+          var secondDate = b["check-in"];
+          return DateTime.parse(firstDate).compareTo(DateTime.parse(secondDate));
+        });
+      });
+
+      // print(student);
+    } catch(e) {
+    }
+  }
+
+  Future<void> loadFormat() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _flag = prefs.getBool("flag") ?? false;
+    });
+  }
+
+  Future<void> flagFormat() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("flag", _flag);
+
+    setState(() {
+      _flag = prefs.getBool("flag") ?? false;
+    });
+    print(_flag);
+  }
+
+
+  void setResults(String query) {
+    search = student
+        .where((elem) =>
+    elem['user']
+        .toString()
+        .toLowerCase()
+        .contains(query.toLowerCase()))
+        .toList();
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        actions: [
+          TextButton(
+            child: const Text(
+              'Change Format',
+              style: TextStyle(color: Colors.white),
+            ),
+            onPressed: () {
+              _flag = !_flag;
+              flagFormat();
+
+            },
+          ),
+        ],
+        title: const Text('Attendance Record'),
       ),
-      body: Center(
-        child: FutureBuilder(
-          future: DefaultAssetBundle.of(context).loadString('assets/attendance_dataset/attendance.json'),
-          builder: (context, snapshot) {
-            var newData = json.decode(snapshot.data.toString());
-
-            newData.sort((a,b) {
-              var firstDate = a["check-in"];
-              var secondDate = b["check-in"];
-              return DateTime.parse(firstDate).compareTo(DateTime.parse(secondDate));
-            });
-
-            return ListView.builder(
-              itemBuilder: (BuildContext context, int index) {
-
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                        top: 32, bottom: 32, left: 16, right: 16
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            InkWell(
-                              onTap: () {},
-                              child:
-                              Text(
-                                newData[index]['user'],
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-                              ),
-                            ),
-                            Text(newData[index]['phone'], style: TextStyle(color: Colors.grey.shade600),),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              onChanged: (value) {
+                // filterSearchResults(searchController.text);
+                setState(() {
+                  setResults(value);
+                  _flagSearch = true;
+                });
 
 
-                          ],
-                        ),
-                        Container(
-                          height: 50,
-                          width: 90,
-                          child: TextButton(
-                              child: Text(
-                                  flag[index] ? timeago.format(DateTime.parse(newData[index]['check-in'])) : newData[index]['check-in']
-                                // '$_counter'
-                              ),
-                            onPressed: () async {
-                                // _savebool();
-                              flag[index] = !flag[index];
-                              saved(index, flag[index]);
-
-                              // setState(() {
-                              //   flag[index] = !flag[index];
-                              //   saved(flag[index], index);
-                              //   _flagA = !_flagA;
-                              //   _savebool();
-                              // });
-                              // SharedPreferences prefs = await SharedPreferences.getInstance();
-                              // prefs.setStringList("flagFormat", flag.map((value) => value.toString()).toList());
-
-
-                            },
-
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                );
               },
-              itemCount: newData == null ? 0 : newData.length,
-            );
-          },
-        )
+              controller: searchController,
+              decoration: const InputDecoration(
+                  labelText: "Search",
+                  hintText: "Search",
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(25.0)))),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              controller: _controller,
+                    itemBuilder: (BuildContext context, int index) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => DetailPage(user: search[index]['user'], phone: search[index]['phone'], date: DateFormat("dd MMM yyyy, h:mm a").format(DateTime.parse(search[index]['check-in'])))));
+                        },
+                        child: Card(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                top: 32, bottom: 32, left: 16, right: 20
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      InkWell(
+                                        onTap: () {},
+                                        child:
+                                        Text(
+                                         _flagSearch ? search[index]['user'] : student[index]['user'],
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+                                        ),
+                                      ),
+                                      Text(_flagSearch ? search[index]['phone'] : student[index]['phone'], style: TextStyle(color: Colors.grey.shade600),),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 30,
+                                  width: 100,
+                                  child: Text(
+                                     _flagSearch ? (_flag ? timeago.format(DateTime.parse(search[index]['check-in'])) : DateFormat("dd MMM yyyy, h:mm a").format(DateTime.parse(search[index]['check-in']))) :
+                                     (_flag ? timeago.format(DateTime.parse(student[index]['check-in'])) : DateFormat("dd MMM yyyy, h:mm a").format(DateTime.parse(student[index]['check-in']))),
+                                    // '$_counter'
+                                  ),
+                                ),
+                                IconButton(
+                                    onPressed: () async {
+                                      SocialShare.shareOptions(student[index]['phone']);
+                                    },
+                                    icon: const Icon(Icons.share)
 
-
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    itemCount: _flagSearch ? search ==  null ? 0 : search.length : student ==  null ? 0 : student.length,
+                  ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -266,14 +294,14 @@ class _MyHomePageState extends State<MyHomePage> {
                         children: <Widget>[
                           TextFormField(
                             controller: studentName,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'Name',
                               icon: Icon(Icons.account_box),
                             ),
                           ),
                           TextFormField(
                             controller: studentPhone,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'Phone',
                               icon: Icon(Icons.phone),
                             ),
@@ -283,28 +311,34 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   actions: [
-                    RaisedButton(
-                      color: Colors.blue,
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(textStyle: TextStyle(color: Colors.blue)),
                         child: Text("Add", style: TextStyle(color: Colors.white),),
                         onPressed: () async {
                         final newDate = DateTime.now();
-                        String newFormatDate = DateFormat('dd MMM yyyy, h:mm a').format(newDate);
-                        final Directory? directory = await getExternalStorageDirectory();
-                        final path = await _localPath;
-                        final File file = File('$path/assets/attendance_dataset/attendance.json');
-                        await addUser(file);
-                        final newStudent = NewUser(
-                            studentName.text,
-                            studentPhone.text,
-                            newFormatDate,
-                        );
-                        student.add(newStudent);
-                        student.map((newUser) => newUser.toJson()).toList();
-                        file.writeAsStringSync(json.encode(student));
-                        Navigator.pushNamed(context, 'main_screen');
+                        String newFormatDate = DateFormat("yyyy-MM-dd hh:mm:ss").format(newDate);
+                        print(newFormatDate);
+                        final newStudent = Attendance(user: studentName.text, phone: studentPhone.text, checkIn: newFormatDate);
+
+                        setState(() {
+                          student.add(newStudent.toJson());
+                          student.sort((b,a) {
+                            var firstDate = a["check-in"];
+                            var secondDate = b["check-in"];
+                            return DateTime.parse(firstDate).compareTo(DateTime.parse(secondDate));
+                          });
+                        });
+
+                        Navigator.pop(context);
+
+                        print(student);
+                        // student.map((newUser) => newUser.toJson()).toList();
+                        // file.writeAsStringSync(json.encode(student));
+                        // Navigator.pushNamed(context, 'main_screen');
 
                           // your code
-                        })
+                        }
+                        ),
                   ],
                 );
               });
