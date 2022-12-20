@@ -15,26 +15,22 @@ import 'Detail_screen.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-
-class _HomeScreenState extends State<HomeScreen>{
-
+class _HomeScreenState extends State<HomeScreen> {
   List student = [];
   List search = [];
 
   late ScrollController _controller;
 
   bool _flagSearch = false;
-
   bool _flag = false;
+
   final nameTextEditing = TextEditingController();
   final phoneTextEditing = TextEditingController();
   final searchTextEditing = TextEditingController();
-
 
   @override
   void initState() {
@@ -51,7 +47,8 @@ class _HomeScreenState extends State<HomeScreen>{
     scaffold.showSnackBar(
       SnackBar(
         content: const Text('You have reached the end of the list'),
-        action: SnackBarAction(label: 'UNDO', onPressed: scaffold.hideCurrentSnackBar),
+        action: SnackBarAction(
+            label: 'UNDO', onPressed: scaffold.hideCurrentSnackBar),
       ),
     );
   }
@@ -65,22 +62,22 @@ class _HomeScreenState extends State<HomeScreen>{
     }
   }
 
-
   Future addUser() async {
     try {
-      var content =  await rootBundle.loadString('assets/attendance_dataset/attendance.json');
+      var content = await rootBundle
+          .loadString('assets/attendance_dataset/attendance.json');
       var response = jsonDecode(content);
       // print(response);
       setState(() {
         student = response;
-        student.sort((b,a) {
+        student.sort((b, a) {
           var firstDate = a["check-in"];
           var secondDate = b["check-in"];
-          return DateTime.parse(firstDate).compareTo(DateTime.parse(secondDate));
+          return DateTime.parse(firstDate)
+              .compareTo(DateTime.parse(secondDate));
         });
       });
-    } catch(e) {
-    }
+    } catch (e) {}
   }
 
   Future<void> loadFormat() async {
@@ -100,18 +97,12 @@ class _HomeScreenState extends State<HomeScreen>{
     print(_flag);
   }
 
-
   void setResults(String query) {
     search = student
         .where((elem) =>
-        elem['user']
-            .toString()
-            .toLowerCase()
-            .contains(query.toLowerCase()))
+            elem['user'].toString().toLowerCase().contains(query.toLowerCase()))
         .toList();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +117,6 @@ class _HomeScreenState extends State<HomeScreen>{
             onPressed: () {
               _flag = !_flag;
               flagFormat();
-
             },
           ),
         ],
@@ -143,8 +133,6 @@ class _HomeScreenState extends State<HomeScreen>{
                   setResults(value);
                   _flagSearch = true;
                 });
-
-
               },
               controller: searchTextEditing,
               decoration: const InputDecoration(
@@ -161,13 +149,20 @@ class _HomeScreenState extends State<HomeScreen>{
               itemBuilder: (BuildContext context, int index) {
                 return GestureDetector(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => DetailPage(user: search[index]['user'], phone: search[index]['phone'], date: DateFormat("dd MMM yyyy, h:mm a").format(DateTime.parse(search[index]['check-in'])))));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => DetailPage(
+                                user: search[index]['user'],
+                                phone: search[index]['phone'],
+                                date: DateFormat("dd MMM yyyy, h:mm a").format(
+                                    DateTime.parse(
+                                        search[index]['check-in'])))));
                   },
                   child: Card(
                     child: Padding(
                       padding: const EdgeInsets.only(
-                          top: 32, bottom: 32, left: 16, right: 20
-                      ),
+                          top: 32, bottom: 32, left: 16, right: 20),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -177,13 +172,21 @@ class _HomeScreenState extends State<HomeScreen>{
                               children: [
                                 InkWell(
                                   onTap: () {},
-                                  child:
-                                  Text(
-                                    _flagSearch ? search[index]['user'] : student[index]['user'],
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+                                  child: Text(
+                                    _flagSearch
+                                        ? search[index]['user']
+                                        : student[index]['user'],
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 22),
                                   ),
                                 ),
-                                Text(_flagSearch ? search[index]['phone'] : student[index]['phone'], style: TextStyle(color: Colors.grey.shade600),),
+                                Text(
+                                  _flagSearch
+                                      ? search[index]['phone']
+                                      : student[index]['phone'],
+                                  style: TextStyle(color: Colors.grey.shade600),
+                                ),
                               ],
                             ),
                           ),
@@ -191,25 +194,41 @@ class _HomeScreenState extends State<HomeScreen>{
                             height: 30,
                             width: 100,
                             child: Text(
-                              _flagSearch ? (_flag ? timeago.format(DateTime.parse(search[index]['check-in'])) : DateFormat("dd MMM yyyy, h:mm a").format(DateTime.parse(search[index]['check-in']))) :
-                              (_flag ? timeago.format(DateTime.parse(student[index]['check-in'])) : DateFormat("dd MMM yyyy, h:mm a").format(DateTime.parse(student[index]['check-in']))),
+                              _flagSearch
+                                  ? (_flag
+                                      ? timeago.format(DateTime.parse(
+                                          search[index]['check-in']))
+                                      : DateFormat("dd MMM yyyy, h:mm a")
+                                          .format(DateTime.parse(
+                                              search[index]['check-in'])))
+                                  : (_flag
+                                      ? timeago.format(DateTime.parse(
+                                          student[index]['check-in']))
+                                      : DateFormat("dd MMM yyyy, h:mm a")
+                                          .format(DateTime.parse(
+                                              student[index]['check-in']))),
                               // '$_counter'
                             ),
                           ),
                           IconButton(
                               onPressed: () async {
-                                SocialShare.shareOptions(student[index]['phone']);
+                                SocialShare.shareOptions(
+                                    student[index]['phone']);
                               },
-                              icon: const Icon(Icons.share)
-
-                          ),
+                              icon: const Icon(Icons.share)),
                         ],
                       ),
                     ),
                   ),
                 );
               },
-              itemCount: _flagSearch ? search ==  null ? 0 : search.length : student ==  null ? 0 : student.length,
+              itemCount: _flagSearch
+                  ? search == null
+                      ? 0
+                      : search.length
+                  : student == null
+                      ? 0
+                      : student.length,
             ),
           ),
         ],
@@ -247,28 +266,35 @@ class _HomeScreenState extends State<HomeScreen>{
                   ),
                   actions: [
                     ElevatedButton(
-                        style: ElevatedButton.styleFrom(textStyle: TextStyle(color: Colors.blue)),
-                        child: const Text("Add", style: TextStyle(color: Colors.white),),
+                        style: ElevatedButton.styleFrom(
+                            textStyle: TextStyle(color: Colors.blue)),
+                        child: const Text(
+                          "Add",
+                          style: TextStyle(color: Colors.white),
+                        ),
                         onPressed: () async {
                           final newDate = DateTime.now();
-                          String newFormatDate = DateFormat("yyyy-MM-dd hh:mm:ss").format(newDate);
+                          String newFormatDate =
+                              DateFormat("yyyy-MM-dd hh:mm:ss").format(newDate);
                           print(newFormatDate);
-                          final newStudent = Attendance(user: nameTextEditing.text, phone: phoneTextEditing.text, checkIn: newFormatDate);
+                          final newStudent = Attendance(
+                              user: nameTextEditing.text,
+                              phone: phoneTextEditing.text,
+                              checkIn: newFormatDate);
 
                           setState(() {
                             student.add(newStudent.toJson());
-                            student.sort((b,a) {
+                            student.sort((b, a) {
                               var firstDate = a["check-in"];
                               var secondDate = b["check-in"];
-                              return DateTime.parse(firstDate).compareTo(DateTime.parse(secondDate));
+                              return DateTime.parse(firstDate)
+                                  .compareTo(DateTime.parse(secondDate));
                             });
                           });
 
                           Navigator.pop(context);
-
                           print(student);
-                        }
-                    ),
+                        }),
                   ],
                 );
               });

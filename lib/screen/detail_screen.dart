@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
 class DetailPage extends StatefulWidget {
-
-  DetailPage({super.key, required this.user, required this.phone, required this.date});
+  const DetailPage({super.key, required this.user, required this.phone, required this.date});
 
   final String user, phone, date;
 
   @override
-  _DetailPageState createState() => _DetailPageState();
+  State<DetailPage> createState() => _DetailPageState();
 }
 
 class _DetailPageState extends State<DetailPage> {
