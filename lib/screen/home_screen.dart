@@ -65,22 +65,28 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _sortAttendance() {
+    attendees.sort((a, b) {
+      return DateTime.parse(b.checkIn)
+          .compareTo(DateTime.parse(a.checkIn));
+    });
+  }
+
   Future addUser() async {
     try {
       var content = await rootBundle
           .loadString('assets/attendance_dataset/attendance.json');
       var response = jsonDecode(content);
-      // print(response);
 
+      for (var json in response) {
+        var attendee = Attendee.fromJson(json);
+        attendees.add(attendee);
+      }
+      _sortAttendance();
       setState(() {
-        student = response;
-        student.sort((b, a) {
-          var firstDate = a["check-in"];
-          var secondDate = b["check-in"];
-          return DateTime.parse(firstDate)
-              .compareTo(DateTime.parse(secondDate));
-        });
+        filteredAttendees = attendees;
       });
+
     } catch (e) {}
   }
 
@@ -99,6 +105,21 @@ class _HomeScreenState extends State<HomeScreen> {
       _flag = prefs.getBool("flag") ?? false;
     });
     print(_flag);
+  }
+
+  void _filterFromQuery(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        filteredAttendees = attendees;
+      } else {
+        filteredAttendees = attendees
+            .where((elem) =>
+            elem.user.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+    });
+
+    print(filteredAttendees.length);
   }
 
   void setResults(String query) {
@@ -132,10 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               onChanged: (value) {
-                setState(() {
-                  setResults(value);
-                  _flagSearch = true;
-                });
+                _filterFromQuery(value);
               },
               controller: searchTextEditing,
               decoration: const InputDecoration(
@@ -150,17 +168,18 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListView.builder(
               controller: _controller,
               itemBuilder: (BuildContext context, int index) {
+                var attendee = filteredAttendees[index];
                 return GestureDetector(
                   onTap: () {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => DetailPage(
-                                user: search[index]['user'],
-                                phone: search[index]['phone'],
+                                user: attendee.user,
+                                phone: attendee.phone,
                                 date: DateFormat("dd MMM yyyy, h:mm a").format(
                                     DateTime.parse(
-                                        search[index]['check-in'])))));
+                                        attendee.checkIn)))));
                   },
                   child: Card(
                     child: Padding(
@@ -176,18 +195,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 InkWell(
                                   onTap: () {},
                                   child: Text(
-                                    _flagSearch
-                                        ? search[index]['user']
-                                        : student[index]['user'],
+                                    attendee.user,
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 22),
                                   ),
                                 ),
                                 Text(
-                                  _flagSearch
-                                      ? search[index]['phone']
-                                      : student[index]['phone'],
+                                  attendee.phone,
                                   style: TextStyle(color: Colors.grey.shade600),
                                 ),
                               ],
@@ -197,26 +212,17 @@ class _HomeScreenState extends State<HomeScreen> {
                             height: 30,
                             width: 100,
                             child: Text(
-                              _flagSearch
-                                  ? (_flag
+                                  _flag
                                       ? timeago.format(DateTime.parse(
-                                          search[index]['check-in']))
+                                          attendee.checkIn))
                                       : DateFormat("dd MMM yyyy, h:mm a")
                                           .format(DateTime.parse(
-                                              search[index]['check-in'])))
-                                  : (_flag
-                                      ? timeago.format(DateTime.parse(
-                                          student[index]['check-in']))
-                                      : DateFormat("dd MMM yyyy, h:mm a")
-                                          .format(DateTime.parse(
-                                              student[index]['check-in']))),
+                                              attendee.checkIn))),
                               // '$_counter'
                             ),
-                          ),
                           IconButton(
                               onPressed: () async {
-                                SocialShare.shareOptions(
-                                    student[index]['phone']);
+                                SocialShare.shareOptions(attendee.checkIn);
                               },
                               icon: const Icon(Icons.share)),
                         ],
@@ -225,13 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               },
-              itemCount: _flagSearch
-                  ? search == null
-                      ? 0
-                      : search.length
-                  : student == null
-                      ? 0
-                      : student.length,
+              itemCount: filteredAttendees.length,
             ),
           ),
         ],
@@ -286,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               checkIn: newFormatDate);
 
                           setState(() {
-                            student.add(newStudent.toJson());
+                            // student.add(newStudent.toJson());
                             student.sort((b, a) {
                               var firstDate = a["check-in"];
                               var secondDate = b["check-in"];

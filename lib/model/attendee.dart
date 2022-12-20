@@ -1,7 +1,7 @@
 class Attendee {
-  String? user;
-  String? phone;
-  String? checkIn;
+  String user;
+  String phone;
+  String checkIn;
 
   Attendee({ required this.user, required this.phone, required this.checkIn }); // Make parameter for Attendee model
 
