@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:attendance_record/components/add_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,11 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late ScrollController _controller;
 
-  bool _flagSearch = false;
   bool _flag = false;
 
-  final nameTextEditing = TextEditingController();
-  final phoneTextEditing = TextEditingController();
   final searchTextEditing = TextEditingController();
 
   @override
@@ -241,65 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
           showDialog(
               context: context,
               builder: (BuildContext context) {
-                return AlertDialog(
-                  scrollable: true,
-                  title: const Text('Add User'),
-                  content: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Form(
-                      child: Column(
-                        children: <Widget>[
-                          TextFormField(
-                            controller: nameTextEditing,
-                            decoration: const InputDecoration(
-                              labelText: 'Name',
-                              icon: Icon(Icons.account_box),
-                            ),
-                          ),
-                          TextFormField(
-                            controller: phoneTextEditing,
-                            decoration: const InputDecoration(
-                              labelText: 'Phone',
-                              icon: Icon(Icons.phone),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  actions: [
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            textStyle: TextStyle(color: Colors.blue)),
-                        child: const Text(
-                          "Add",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        onPressed: () async {
-                          final newDate = DateTime.now();
-                          String newFormatDate =
-                              DateFormat("yyyy-MM-dd hh:mm:ss").format(newDate);
-                          print(newFormatDate);
-                          final newStudent = Attendee(
-                              user: nameTextEditing.text,
-                              phone: phoneTextEditing.text,
-                              checkIn: newFormatDate);
-
-                          setState(() {
-                            // student.add(newStudent.toJson());
-                            student.sort((b, a) {
-                              var firstDate = a["check-in"];
-                              var secondDate = b["check-in"];
-                              return DateTime.parse(firstDate)
-                                  .compareTo(DateTime.parse(secondDate));
-                            });
-                          });
-
-                          Navigator.pop(context);
-                          print(student);
-                        }),
-                  ],
-                );
+                return AddDialog();
               });
         },
         tooltip: 'Increment',
