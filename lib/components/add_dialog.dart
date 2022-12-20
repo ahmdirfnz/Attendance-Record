@@ -5,7 +5,9 @@ import 'package:intl/intl.dart';
 import '../model/attendee.dart';
 
 class AddDialog extends StatefulWidget {
-  const AddDialog({Key? key}) : super(key: key);
+  const AddDialog({super.key, required this.onCreateAttendee});
+
+  final ValueSetter<Attendee> onCreateAttendee;
 
   @override
   State<AddDialog> createState() => _AddDialogState();
@@ -21,15 +23,13 @@ class _AddDialogState extends State<AddDialog> {
   }
 
   void _addAttendee() {
-    final newDate = DateTime.now();
-    String newFormatDate =
-    DateFormat("yyyy-MM-dd hh:mm:ss").format(newDate);
-    print(newFormatDate);
+    String date =
+    DateFormat("yyyy-MM-dd hh:mm:ss").format(DateTime.now());
     final attendee = Attendee(
         user: nameFieldController.text,
         phone: phoneFieldController.text,
-        checkIn: newFormatDate);
-
+        checkIn: date);
+    widget.onCreateAttendee(attendee);
     Navigator.pop(context);
   }
 

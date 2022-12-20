@@ -120,11 +120,11 @@ class _HomeScreenState extends State<HomeScreen> {
     print(filteredAttendees.length);
   }
 
-  void setResults(String query) {
-    search = student
-        .where((elem) =>
-            elem['user'].toString().toLowerCase().contains(query.toLowerCase()))
-        .toList();
+  void _addAttendee(Attendee attendee) {
+    setState(() {
+      attendees.add(attendee);
+      _sortAttendance();
+    });
   }
 
   @override
@@ -239,7 +239,10 @@ class _HomeScreenState extends State<HomeScreen> {
           showDialog(
               context: context,
               builder: (BuildContext context) {
-                return AddDialog();
+                return AddDialog(onCreateAttendee: (attendee) {
+                  _addAttendee(attendee);
+                  print(attendee.user);
+                });
               });
         },
         tooltip: 'Increment',
