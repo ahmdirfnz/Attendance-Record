@@ -23,6 +23,9 @@ class _HomeScreenState extends State<HomeScreen> {
   List student = [];
   List search = [];
 
+  List<Attendee> attendees = [];
+  List<Attendee> filteredAttendees = [];
+
   late ScrollController _controller;
 
   bool _flagSearch = false;
@@ -68,6 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
           .loadString('assets/attendance_dataset/attendance.json');
       var response = jsonDecode(content);
       // print(response);
+
       setState(() {
         student = response;
         student.sort((b, a) {
