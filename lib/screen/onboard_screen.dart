@@ -1,7 +1,7 @@
-import 'package:attendance_record/main.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
@@ -12,11 +12,11 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
 
-  void _hehe() async {
+  void _updatePreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('done_onboarding', true);
     Navigator.of(this.context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) {
-      return MyHomePage();
+      return HomeScreen();
     }));
   }
 
@@ -30,7 +30,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text('Hello Guys !!!', style: TextStyle(fontSize: 40),),
-                      TextButton(onPressed: _hehe, child: Text('Hehhe'))
+                      TextButton(onPressed: _updatePreferences, child: Text('Hehhe'))
                     ],
                   ),
                 )
