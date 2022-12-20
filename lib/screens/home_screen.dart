@@ -175,40 +175,35 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: InkWell(
                       onTap: () => _openDetailScreen(attendee),
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 24),
+                        padding: const EdgeInsets.only(left: 24, right: 16, top: 24, bottom: 24),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                InkWell(
-                                  onTap: () {},
-                                  child: Text(
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
                                     attendee.user,
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 22),
                                   ),
-                                ),
-                                Text(
-                                  attendee.phone,
-                                  style: TextStyle(color: Colors.grey.shade600),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 30,
-                              width: 100,
-                              child: Text(
-                                    _flagChangeDateFormat
-                                        ? timeago.format(DateTime.parse(
-                                            attendee.checkIn))
-                                        : DateFormat("dd MMM yyyy, h:mm a")
-                                            .format(DateTime.parse(
-                                                attendee.checkIn))),
-                                // '$_counter'
+                                  Text(
+                                    attendee.phone,
+                                    style: TextStyle(color: Colors.grey.shade600),
+                                  ),
+                                ],
                               ),
+                            ),
+                            Text(
+                                  _flagChangeDateFormat
+                                      ? timeago.format(DateTime.parse(
+                                          attendee.checkIn))
+                                      : DateFormat("dd MMM yyyy\n h:mm a")
+                                          .format(DateTime.parse(
+                                              attendee.checkIn)), textAlign: TextAlign.right,),
+                            const SizedBox(width: 16),
                             IconButton(
                                 onPressed: () async {
                                   SocialShare.shareOptions(attendee.checkIn);
