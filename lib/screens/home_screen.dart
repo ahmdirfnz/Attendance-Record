@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:attendance_record/components/add_dialog.dart';
+import 'package:attendance_record/helper/extensions.dart';
 import 'package:attendance_record/screens/detail_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -200,9 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   _flagChangeDateFormat
                                       ? timeago.format(DateTime.parse(
                                           attendee.checkIn))
-                                      : DateFormat("dd MMM yyyy\n h:mm a")
-                                          .format(DateTime.parse(
-                                              attendee.checkIn)), textAlign: TextAlign.right,),
+                                      : attendee.checkIn.formattedDate(), textAlign: TextAlign.right,),
                             const SizedBox(width: 16),
                             IconButton(
                                 onPressed: () async {

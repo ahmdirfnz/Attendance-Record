@@ -1,3 +1,4 @@
+import 'package:attendance_record/helper/extensions.dart';
 import 'package:flutter/material.dart';
 import '../model/attendee.dart';
 
@@ -25,12 +26,25 @@ class _DetailPageState extends State<DetailPage> {
             icon: Icon(Icons.arrow_back),
           ),
         ),
-        body: Column(
-          children: [
-            Text(widget.attendee.user),
-            Text(widget.attendee.phone),
-            Text(widget.attendee.checkIn),
-          ],
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.attendee.user,
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                  widget.attendee.phone,
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)
+              ),
+              Text(
+                  widget.attendee.checkIn.formattedDate(),
+                  style: const TextStyle(fontSize: 20),
+              ),
+            ],
+          ),
         ),
       ),
     );
