@@ -33,29 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_scrollListener);
     _loadAttendees();
     _loadDateFormat();
-  }
-
-  void _showToast(BuildContext context) {
-    final scaffold = ScaffoldMessenger.of(context);
-    scaffold.showSnackBar(
-      SnackBar(
-        content: const Text('You have reached the end of the list'),
-        action: SnackBarAction(
-            label: 'UNDO', onPressed: scaffold.hideCurrentSnackBar),
-      ),
-    );
-  }
-
-  _scrollListener() {
-    if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
-        !_scrollController.position.outOfRange) {
-      setState(() {
-        _showToast(context);
-      });
-    }
   }
 
   void _sortAttendances() {
@@ -172,46 +151,55 @@ class _HomeScreenState extends State<HomeScreen> {
                 var attendee = filteredAttendees[index];
                 return Container(
                   margin: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 4),
-                  child: Card(
-                    child: InkWell(
-                      onTap: () => _openDetailScreen(attendee),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 24, right: 16, top: 24, bottom: 24),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    attendee.user,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 22),
+                  child: Column(
+                    children: [
+                      Card(
+                        child: InkWell(
+                          onTap: () => _openDetailScreen(attendee),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 24, right: 16, top: 24, bottom: 24),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        attendee.user,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 22),
+                                      ),
+                                      Text(
+                                        attendee.phone,
+                                        style: TextStyle(color: Colors.grey.shade600),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    attendee.phone,
-                                    style: TextStyle(color: Colors.grey.shade600),
-                                  ),
-                                ],
-                              ),
+                                ),
+                                Text(
+                                      _flagChangeDateFormat
+                                          ? timeago.format(DateTime.parse(
+                                              attendee.checkIn))
+                                          : attendee.checkIn.formattedDate(), textAlign: TextAlign.right,),
+                                const SizedBox(width: 16),
+                                IconButton(
+                                    onPressed: () async {
+                                      SocialShare.shareOptions(attendee.checkIn);
+                                    },
+                                    icon: const Icon(Icons.share)),
+                              ],
                             ),
-                            Text(
-                                  _flagChangeDateFormat
-                                      ? timeago.format(DateTime.parse(
-                                          attendee.checkIn))
-                                      : attendee.checkIn.formattedDate(), textAlign: TextAlign.right,),
-                            const SizedBox(width: 16),
-                            IconButton(
-                                onPressed: () async {
-                                  SocialShare.shareOptions(attendee.checkIn);
-                                },
-                                icon: const Icon(Icons.share)),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
+                      if (index == filteredAttendees.length - 1)
+                        const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text('You have reached the end of the list'),
+                        )
+                    ],
                   ),
                 );
               },
