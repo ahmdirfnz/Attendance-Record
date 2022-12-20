@@ -1,5 +1,5 @@
-import 'package:attendance_record/screen/home_screen.dart';
-import 'package:attendance_record/screen/onboard_screen.dart';
+import 'package:attendance_record/screens/home_screen.dart';
+import 'package:attendance_record/screens/onboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
