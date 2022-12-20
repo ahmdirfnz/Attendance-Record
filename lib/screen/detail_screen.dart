@@ -18,6 +18,11 @@ class _DetailPageState extends State<DetailPage> {
           title: const Text(
             'Detail Page'
           ),
+          leading: IconButton(onPressed: () {
+            Navigator.pop(context);
+          },
+            icon: Icon(Icons.arrow_back),
+          ),
         ),
         body: Column(
           children: [
