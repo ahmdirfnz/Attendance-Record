@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:attendance_record/components/add_dialog.dart';
+import 'package:attendance_record/screens/detail_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,7 +12,6 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/attendee.dart';
-import 'Detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -21,26 +21,20 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List student = [];
-  List search = [];
-
   List<Attendee> attendees = [];
   List<Attendee> filteredAttendees = [];
 
-  late ScrollController _controller;
-
-  bool _flag = false;
-
-  final searchTextEditing = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final _searchInputController = TextEditingController();
+  final String _keyFlagDateFormat = "keyFlagDateFormat";
+  bool _flagChangeDateFormat = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = ScrollController();
-    _controller.addListener(_scrollListener);
-    search.addAll(student);
-    addUser();
-    loadFormat();
+    _scrollController.addListener(_scrollListener);
+    _loadAttendees();
+    _loadDateFormat();
   }
 
   void _showToast(BuildContext context) {
@@ -55,22 +49,22 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _scrollListener() {
-    if (_controller.offset >= _controller.position.maxScrollExtent &&
-        !_controller.position.outOfRange) {
+    if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
+        !_scrollController.position.outOfRange) {
       setState(() {
         _showToast(context);
       });
     }
   }
 
-  void _sortAttendance() {
+  void _sortAttendances() {
     attendees.sort((a, b) {
       return DateTime.parse(b.checkIn)
           .compareTo(DateTime.parse(a.checkIn));
     });
   }
 
-  Future addUser() async {
+  Future _loadAttendees() async {
     try {
       var content = await rootBundle
           .loadString('assets/attendance_dataset/attendance.json');
@@ -80,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
         var attendee = Attendee.fromJson(json);
         attendees.add(attendee);
       }
-      _sortAttendance();
+      _sortAttendances();
       setState(() {
         filteredAttendees = attendees;
       });
@@ -88,21 +82,20 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {}
   }
 
-  Future<void> loadFormat() async {
+  void _loadDateFormat() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _flag = prefs.getBool("flag") ?? false;
+      _flagChangeDateFormat = prefs.getBool(_keyFlagDateFormat) ?? false;
     });
   }
 
-  Future<void> flagFormat() async {
+  void _changeDateFormat() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("flag", _flag);
+    await prefs.setBool(_keyFlagDateFormat, _flagChangeDateFormat);
 
     setState(() {
-      _flag = prefs.getBool("flag") ?? false;
+      _flagChangeDateFormat = prefs.getBool(_keyFlagDateFormat) ?? false;
     });
-    print(_flag);
   }
 
   void _filterFromQuery(String query) {
@@ -123,8 +116,17 @@ class _HomeScreenState extends State<HomeScreen> {
   void _addAttendee(Attendee attendee) {
     setState(() {
       attendees.add(attendee);
-      _sortAttendance();
+      _sortAttendances();
     });
+  }
+
+  void _openDetailScreen(Attendee attendee) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => DetailPage(attendee: attendee)
+        )
+    );
   }
 
   @override
@@ -138,8 +140,8 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(color: Colors.white),
             ),
             onPressed: () {
-              _flag = !_flag;
-              flagFormat();
+              _flagChangeDateFormat = !_flagChangeDateFormat;
+              _changeDateFormat();
             },
           ),
         ],
@@ -153,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onChanged: (value) {
                 _filterFromQuery(value);
               },
-              controller: searchTextEditing,
+              controller: _searchInputController,
               decoration: const InputDecoration(
                   labelText: "Search",
                   hintText: "Search",
@@ -164,30 +166,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Expanded(
             child: ListView.builder(
-              controller: _controller,
+              controller: _scrollController,
               itemBuilder: (BuildContext context, int index) {
                 var attendee = filteredAttendees[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => DetailPage(
-                                user: attendee.user,
-                                phone: attendee.phone,
-                                date: DateFormat("dd MMM yyyy, h:mm a").format(
-                                    DateTime.parse(
-                                        attendee.checkIn)))));
-                  },
+                return Container(
+                  margin: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 4),
                   child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                          top: 32, bottom: 32, left: 16, right: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            child: Column(
+                    child: InkWell(
+                      onTap: () => _openDetailScreen(attendee),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 24),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 InkWell(
@@ -205,25 +197,25 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ],
                             ),
-                          ),
-                          SizedBox(
-                            height: 30,
-                            width: 100,
-                            child: Text(
-                                  _flag
-                                      ? timeago.format(DateTime.parse(
-                                          attendee.checkIn))
-                                      : DateFormat("dd MMM yyyy, h:mm a")
-                                          .format(DateTime.parse(
-                                              attendee.checkIn))),
-                              // '$_counter'
-                            ),
-                          IconButton(
-                              onPressed: () async {
-                                SocialShare.shareOptions(attendee.checkIn);
-                              },
-                              icon: const Icon(Icons.share)),
-                        ],
+                            SizedBox(
+                              height: 30,
+                              width: 100,
+                              child: Text(
+                                    _flagChangeDateFormat
+                                        ? timeago.format(DateTime.parse(
+                                            attendee.checkIn))
+                                        : DateFormat("dd MMM yyyy, h:mm a")
+                                            .format(DateTime.parse(
+                                                attendee.checkIn))),
+                                // '$_counter'
+                              ),
+                            IconButton(
+                                onPressed: () async {
+                                  SocialShare.shareOptions(attendee.checkIn);
+                                },
+                                icon: const Icon(Icons.share)),
+                          ],
+                        ),
                       ),
                     ),
                   ),

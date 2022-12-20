@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import '../model/attendee.dart';
 
 class DetailPage extends StatefulWidget {
-  const DetailPage({super.key, required this.user, required this.phone, required this.date});
+  const DetailPage({super.key, required this.attendee});
 
-  final String user, phone, date;
+  final Attendee attendee;
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -26,9 +27,9 @@ class _DetailPageState extends State<DetailPage> {
         ),
         body: Column(
           children: [
-            Text(widget.user),
-            Text(widget.phone),
-            Text(widget.date),
+            Text(widget.attendee.user),
+            Text(widget.attendee.phone),
+            Text(widget.attendee.checkIn),
           ],
         ),
       ),
