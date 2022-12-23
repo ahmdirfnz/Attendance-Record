@@ -184,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(width: 16),
                                 IconButton(
                                     onPressed: () async {
-                                      SocialShare.shareOptions(attendee.checkIn);
+                                      SocialShare.shareOptions(attendee.phone);
                                     },
                                     icon: const Icon(Icons.share)),
                               ],
